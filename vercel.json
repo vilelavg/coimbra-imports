@@ -1,0 +1,17 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "build",
+  "framework": "create-react-app",
+  "rewrites": [
+    { "source": "/retro/(.*)", "destination": "/retro/$1" },
+    { "source": "/feminino/(.*)", "destination": "/feminino/$1" },
+    { "source": "/infantil/(.*)", "destination": "/infantil/$1" },
+    { "source": "/modeloJogador/(.*)", "destination": "/modeloJogador/$1" },
+    { "source": "/timesEuropeus/(.*)", "destination": "/timesEuropeus/$1" },
+    { "source": "/camisasCoimbra/(.*)", "destination": "/camisasCoimbra/$1" },
+    { "source": "/selecoes/(.*)", "destination": "/selecoes/$1" },
+    { "source": "/calcoes/(.*)", "destination": "/calcoes/$1" },
+    { "source": "/conjuntos/(.*)", "destination": "/conjuntos/$1" },
+    { "source": "/((?!static|.*\\..*|_next).*)", "destination": "/index.html" }
+  ]
+}
