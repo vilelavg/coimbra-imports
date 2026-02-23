@@ -25,14 +25,30 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const ProductImage = ({ imageFile, folder = 'camisasCoimbra', alt, style }) => {
   const [currentExtIndex, setCurrentExtIndex] = useState(0);
   const [hasError, setHasError] = useState(false);
+  const [imgKey, setImgKey] = useState(0);
   
   const extensions = ['.jpg', '.png', '.jpeg'];
   
+  // Reset quando mudar o imageFile
+  useEffect(() => {
+    setCurrentExtIndex(0);
+    setHasError(false);
+    setImgKey(prev => prev + 1);
+  }, [imageFile]);
+  
   const handleError = () => {
     if (currentExtIndex < extensions.length - 1) {
-      setCurrentExtIndex(currentExtIndex + 1);
+      setCurrentExtIndex(prev => prev + 1);
     } else {
       setHasError(true);
+    }
+  };
+
+  const handleLoad = (e) => {
+    // Verifica se a imagem carregada é válida (não é HTML de erro)
+    const img = e.target;
+    if (img.naturalWidth === 0 || img.naturalHeight === 0) {
+      handleError();
     }
   };
   
@@ -42,9 +58,11 @@ const ProductImage = ({ imageFile, folder = 'camisasCoimbra', alt, style }) => {
   
   return (
     <img 
+      key={`${imgKey}-${currentExtIndex}`}
       src={`/${folder}/${imageFile}${extensions[currentExtIndex]}`}
       alt={alt}
       onError={handleError}
+      onLoad={handleLoad}
       style={style}
     />
   );
