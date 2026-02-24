@@ -1096,15 +1096,18 @@ const CategoryButton = ({ category, onClick }) => (
       justifyContent: 'center',
       paddingBottom: '15px'
     }}>
-      <span style={{
-        fontFamily: "'Teko', sans-serif",
-        fontSize: '1.4rem',
-        fontWeight: 600,
-        textTransform: 'uppercase',
-        letterSpacing: '1px',
-        color: '#fff',
-        textAlign: 'center'
-      }}>
+      <span 
+        className={category.shortName === 'Brasileiros' ? 'category-brasileiros' : ''}
+        style={{
+          fontFamily: "'Teko', sans-serif",
+          fontSize: '1.4rem',
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          letterSpacing: '1px',
+          color: '#fff',
+          textAlign: 'center'
+        }}
+      >
         {category.shortName}
       </span>
     </div>
@@ -1725,24 +1728,7 @@ export default function App() {
                     {item.texto} <span style={{ color: '#fcb404' }}>{item.destaque}</span>
                   </p>
                 </div>
-              ))}
-            {/* Indicadores do carrossel */}
-            <div style={{ display: 'flex', gap: '8px', marginTop: '20px' }}>
-              {[0, 1, 2].map((index) => (
-                <div 
-                  key={index}
-                  onClick={() => setCarouselIndex(index)}
-                  style={{
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '50%',
-                    backgroundColor: carouselIndex === index ? '#fcb404' : '#444',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.3s ease'
-                  }}
-                />
-              ))}
-            </div>
+              ))}            
           </div>        
           {/* Botão Arsenal */}
         <button 
@@ -1953,6 +1939,7 @@ const renderCheckout = () => (
             grid-template-columns: repeat(3, 1fr);
           }
         }
+        @media (max-width: 768px) { .category-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; } .capa-desktop { display: none !important; } .capa-carrossel { display: flex !important; } .capa-logo-img { transform: translateY(15%); } .header-search-container { justify-content: flex-start !important; } .category-brasileiros { font-size: 1.1rem !important; } }
 
         @media (min-width: 1024px) {
           .products-grid {
