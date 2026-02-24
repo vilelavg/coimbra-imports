@@ -13,6 +13,7 @@ import {
   Phone,
   Package,
   LayoutGrid,
+  Home,
   Search
 } from 'lucide-react';
 
