@@ -402,10 +402,10 @@ const CategoryButton = ({ category, onClick }) => (
 // Product Card Component
 const ProductCard = ({ product, onClick }) => {
   const isAvailable = product.inStock !== false;
-  
+
   return (
-    <div 
-      onClick={() => isAvailable && onClick(product)} 
+    <div
+      onClick={() => isAvailable && onClick(product)}
       style={{
         backgroundColor: 'rgba(40, 40, 40, 0.95)',
         borderRadius: '12px',
@@ -421,7 +421,7 @@ const ProductCard = ({ product, onClick }) => {
         display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
         position: 'relative'
       }}>
-        <ProductImage 
+        <ProductImage
           imageFile={product.imageFile}
           folder={product.folder || 'camisasCoimbra'}
           alt={product.name}
@@ -1223,6 +1223,13 @@ export default function App() {
             grid-template-columns: repeat(3, 1fr);
           }
         }
+          @media (min-width: 1024px) {
+  .products-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    max-width: 900px !important;
+    margin: 0 auto !important;
+  }
+}
         @media (max-width: 768px) { .category-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; } .capa-desktop { display: none !important; } .capa-carrossel { display: flex !important; } .capa-logo-img { transform: translateY(15%); } .header-search-container { justify-content: flex-start !important; } .category-brasileiros { font-size: 1.1rem !important; } }
 
         @media (min-width: 1024px) {
