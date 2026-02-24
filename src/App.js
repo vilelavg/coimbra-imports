@@ -900,7 +900,6 @@ const PRODUCTS_BY_CATEGORY = {
 };
 
 // Header Component
-// Header Component
 const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesButton = false, showSearchBar = false, searchTerm = '', onSearchChange, onSearchSubmit }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -957,17 +956,13 @@ const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesB
         pointerEvents: 'none'
       }} />
 
-      {/* Lado Esquerdo - Vazio */}
-      <div style={{ width: '60px' }}>
-      </div>
-      
-      {/* Centro - Barra de Busca */}
-      <div style={{ 
+      {/* Lado Esquerdo e Centro - Barra de Busca */}
+      <div className="header-search-container" style={{ 
         display: 'flex', 
         alignItems: 'center', 
-        justifyContent: 'center',
         flex: 1,
-        padding: '0 10px'
+        justifyContent: 'center',
+        paddingRight: '10px'
       }}>
         {showSearchBar && (
           <div style={{
@@ -1019,7 +1014,6 @@ const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesB
         display: 'flex', 
         gap: '15px', 
         alignItems: 'center',
-        width: '60px',
         justifyContent: 'flex-end'
       }}>
         {showCategoriesButton && (
@@ -1425,8 +1419,15 @@ export default function App() {
   const getFilteredProducts = () => {
     const products = PRODUCTS_BY_CATEGORY[selectedCategory?.id] || [];
     if (!searchFilter) return products;
+    
+    const removeAccents = (str) => {
+      return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    };
+    
+    const searchNormalized = removeAccents(searchFilter.toLowerCase());
+    
     return products.filter(product => 
-      product.name.toLowerCase().includes(searchFilter.toLowerCase())
+      removeAccents(product.name.toLowerCase()).includes(searchNormalized)
     );
   };
   
@@ -1944,7 +1945,7 @@ const renderCheckout = () => (
         .action-arrow { margin-top: 20px; font-family: 'Teko', sans-serif; font-size: 1.1rem; color: #fcb404; opacity: 0; transform: translateY(15px); transition: all 0.4s ease; font-weight: 600; letter-spacing: 2px; }
         .category-card:hover .action-arrow { opacity: 1; transform: translateY(0); }
         .category-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%; max-width: 1100px; padding: 0 15px; }
-@media (max-width: 768px) { .category-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; } }
+@media (max-width: 768px) { .category-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; } }@media (max-width: 768px) { .header-search-container { justify-content: flex-start !important; } }
 @media (max-width: 768px) { .category-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; } .capa-desktop { display: none !important; } .capa-carrossel { display: flex !important; } .capa-logo-img { transform: translateY(15%); } }@media (min-width: 769px) { .capa-logo { margin-top: 30px !important; } .capa-imagens { margin-top: -70px !important; } .capa-botao { margin-top: -30px !important; transform: scale(0.85); } }        }
 
         @media (min-width: 768px) {
