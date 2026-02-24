@@ -11,9 +11,9 @@ import {
   MapPin,
   User,
   Phone,
-  Home,
   Package,
-  LayoutGrid
+  LayoutGrid,
+  Search
 } from 'lucide-react';
 
 // Configuração do Supabase
@@ -899,7 +899,8 @@ const PRODUCTS_BY_CATEGORY = {
 };
 
 // Header Component
-const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesButton = false }) => {
+// Header Component
+const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesButton = false, showSearchBar = false, searchTerm = '', onSearchChange, onSearchSubmit }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -922,6 +923,12 @@ const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesB
       window.removeEventListener('scroll', handleScroll);
     };
   }, [lastScrollY]);
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      onSearchSubmit();
+    }
+  };
 
   return (
     <header style={{
@@ -953,13 +960,57 @@ const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesB
       <div style={{ width: '60px' }}>
       </div>
       
-      {/* Centro - Vazio */}
+      {/* Centro - Barra de Busca */}
       <div style={{ 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
-        flex: 1
+        flex: 1,
+        padding: '0 10px'
       }}>
+        {showSearchBar && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            backgroundColor: '#fff',
+            borderRadius: '8px',
+            border: '2px solid #fcb404',
+            overflow: 'hidden',
+            width: '100%',
+            maxWidth: '300px'
+          }}>
+            <input
+              type="text"
+              placeholder="Buscar produto..."
+              value={searchTerm}
+              onChange={(e) => onSearchChange(e.target.value)}
+              onKeyPress={handleKeyPress}
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                border: 'none',
+                outline: 'none',
+                fontSize: '14px',
+                backgroundColor: '#fff',
+                color: '#000'
+              }}
+            />
+            <button
+              onClick={onSearchSubmit}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '8px 12px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <Search style={{ width: '18px', height: '18px', color: '#fcb404' }} />
+            </button>
+          </div>
+        )}
       </div>
       
       {/* Lado Direito - Ícones Grid e Carrinho */}
@@ -1325,6 +1376,8 @@ export default function App() {
   const [view, setView] = useState('categories');
   const [showCover, setShowCover] = useState(true);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchFilter, setSearchFilter] = useState('');
   useEffect(() => {
   if (showCover) {
     const interval = setInterval(() => {
@@ -1341,7 +1394,12 @@ export default function App() {
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
   const cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
 
-  const handleCategoryClick = (category) => { setSelectedCategory(category); setView('products'); };
+  const handleCategoryClick = (category) => { 
+    setSelectedCategory(category); 
+    setView('products'); 
+    setSearchTerm('');
+    setSearchFilter('');
+  };
   const handleProductClick = (product) => { setSelectedProduct(product); };
   const handleAddToCart = (product, size) => {
     const cartItem = { 
@@ -1359,6 +1417,17 @@ export default function App() {
     else setCart(cart.map(item => item.cartId === cartId ? { ...item, quantity: newQuantity } : item));
   };
   const handleRemoveFromCart = (cartId) => { setCart(cart.filter(item => item.cartId !== cartId)); };
+  const handleSearchSubmit = () => {
+    setSearchFilter(searchTerm);
+  };
+
+  const getFilteredProducts = () => {
+    const products = PRODUCTS_BY_CATEGORY[selectedCategory?.id] || [];
+    if (!searchFilter) return products;
+    return products.filter(product => 
+      product.name.toLowerCase().includes(searchFilter.toLowerCase())
+    );
+  };
   
   // Função para salvar pedido no banco de dados
   const salvarPedido = async () => {
@@ -1723,20 +1792,21 @@ export default function App() {
 const renderProducts = () => (
     <div style={{ minHeight: '100vh', width: '100%', background: '#000', padding: '40px 20px', paddingTop: '100px' }}>      
       <Header 
-        showBack={false} 
         cartCount={cartCount} 
         onCartClick={() => setView('cart')} 
-        onHomeClick={() => { setShowCover(true); setView('categories'); }}
         showCategoriesButton={true}
-        onCategoriesClick={() => setView('categories')}
+        onCategoriesClick={() => { setView('categories'); setSearchTerm(''); setSearchFilter(''); }}
+        showSearchBar={true}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onSearchSubmit={handleSearchSubmit}
       />
       <h1 style={{ textAlign: 'center', color: '#FFFFFF', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '10px', fontFamily: "'Teko', sans-serif", fontSize: '2.5rem' }}>
         Coimbra <span style={{ color: '#fcb404' }}>Imports</span>
       </h1>
       <h2 style={{ textAlign: 'center', color: '#B0B0B0', marginBottom: '40px', fontWeight: '600', fontSize: '1.8rem', fontFamily: "'Teko', sans-serif", textTransform: 'uppercase', letterSpacing: '2px' }}>{selectedCategory?.name}</h2>
       <div className="products-grid" style={{ display: 'grid', gap: '15px', maxWidth: '1200px', margin: '0 auto', padding: '0 10px' }}>
-        {PRODUCTS_BY_CATEGORY[selectedCategory?.id]?.map((product) => <ProductCard key={product.id} product={product} onClick={handleProductClick} />)}
-      </div>
+      {getFilteredProducts().map((product) => <ProductCard key={product.id} product={product} onClick={handleProductClick} />)}      </div>
     </div>
   );
 
