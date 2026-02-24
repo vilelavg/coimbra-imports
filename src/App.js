@@ -161,7 +161,7 @@ const fetchProductsByCategory = async (categoryId) => {
   try {
     const { data, error } = await supabase
       .from(config.tabela)
-      .select('id_produto, descricao, preco, tamanhos, arquivo')
+      .select('id_produto, descricao, preco, tamanhos, arquivo, estoque')
       .order('id_produto', { ascending: true });
 
     if (error) {
@@ -169,14 +169,14 @@ const fetchProductsByCategory = async (categoryId) => {
       return [];
     }
 
-    // Mapear os dados do Supabase para o formato esperado pelo webapp
     return data.map(produto => ({
       id: produto.id_produto,
       name: produto.descricao,
       price: parseFloat(produto.preco),
       imageFile: produto.arquivo,
       folder: config.folder,
-      sizes: produto.tamanhos ? produto.tamanhos.split(', ') : ['P', 'M', 'G', 'GG']
+      sizes: produto.tamanhos ? produto.tamanhos.split(', ') : ['P', 'M', 'G', 'GG'],
+      inStock: produto.estoque !== false
     }));
   } catch (err) {
     console.error('Erro na conexão:', err);
@@ -401,73 +401,48 @@ const CategoryButton = ({ category, onClick }) => (
 
 // Product Card Component
 const ProductCard = ({ product, onClick }) => {
-  const [isHovered, setIsHovered] = useState(false);
-
+  const isAvailable = product.inStock !== false;
+  
   return (
-    <div
-      onClick={() => onClick(product)}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+    <div 
+      onClick={() => isAvailable && onClick(product)} 
       style={{
-        backgroundColor: '#1E1E1E',
+        backgroundColor: 'rgba(40, 40, 40, 0.95)',
         borderRadius: '12px',
-        padding: '15px',
-        textAlign: 'center',
-        transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
-        border: isHovered ? '1px solid #fcb404' : '1px solid #333',
-        transform: isHovered ? 'translateY(-5px)' : 'translateY(0)',
-        boxShadow: isHovered ? '0 5px 15px rgba(252, 180, 4, 0.1)' : 'none',
-        cursor: 'pointer'
+        overflow: 'hidden',
+        cursor: isAvailable ? 'pointer' : 'default',
+        transition: 'transform 0.2s, box-shadow 0.2s',
+        border: '1px solid #333',
+        opacity: isAvailable ? 1 : 0.7
       }}
     >
       <div style={{
-        width: '100%',
-        height: '220px',
-        backgroundColor: '#2C2C2C',
-        borderRadius: '8px',
-        marginBottom: '15px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden'
+        width: '100%', aspectRatio: '1', backgroundColor: '#2C2C2C',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+        position: 'relative'
       }}>
-        <ProductImage
+        <ProductImage 
           imageFile={product.imageFile}
           folder={product.folder || 'camisasCoimbra'}
           alt={product.name}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
         />
       </div>
-
-      <h3 style={{
-        fontFamily: "'Teko', sans-serif",
-        fontSize: '1.3rem',
-        color: '#FFFFFF',
-        margin: '0 0 5px 0',
-        textTransform: 'uppercase',
-        letterSpacing: '1px',
-        lineHeight: '1.2'
-      }}>
-        {product.name}
-      </h3>
-
-      <button style={{
-        width: '100%',
-        padding: '12px',
-        backgroundColor: isHovered ? '#fcb404' : 'transparent',
-        border: '2px solid #fcb404',
-        color: isHovered ? '#121212' : '#fcb404',
-        fontFamily: "'Teko', sans-serif",
-        fontWeight: '600',
-        fontSize: '1.2rem',
-        borderRadius: '6px',
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-        letterSpacing: '1px',
-        textTransform: 'uppercase'
-      }}>
-        {isHovered ? 'VER TAMANHOS' : `R$ ${product.price.toFixed(2).replace('.', ',')}`}
-      </button>
+      <div style={{ padding: '12px' }}>
+        <h3 style={{
+          color: '#fff', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap', fontFamily: "'Teko', sans-serif", fontSize: '1.2rem', textTransform: 'uppercase'
+        }}>{product.name}</h3>
+        {isAvailable ? (
+          <p style={{ color: '#fcb404', fontWeight: 'bold', marginTop: '4px', fontFamily: "'Teko', sans-serif", fontSize: '1.3rem' }}>
+            R$ {product.price.toFixed(2).replace('.', ',')}
+          </p>
+        ) : (
+          <p style={{ color: '#888', fontWeight: 'bold', marginTop: '4px', fontFamily: "'Teko', sans-serif", fontSize: '1.3rem', textTransform: 'uppercase' }}>
+            Indisponível
+          </p>
+        )}
+      </div>
     </div>
   );
 };
