@@ -87,7 +87,7 @@ const CATEGORY_CONFIG = {
     name: 'Times Europeus/Outros',
     shortName: 'Europeus',
     backgroundImage: '/backEuropeus.png',
-    tabela: 'times_europeus',
+    tabela: 'europeus',
     folder: 'timesEuropeus'
   },
   2: {
@@ -798,7 +798,7 @@ export default function App() {
       const itensPedido = await Promise.all(cart.map(async (item) => {
         // Mapear categoria para nome da tabela
         const tabelasPorCategoria = {
-          'Times Europeus/Outros': 'times_europeus',
+          'Times Europeus/Outros': 'europeus',
           'Times Brasileiros': 'times_brasileiros',
           'Seleções': 'selecoes',
           'Retrô': 'retro',
