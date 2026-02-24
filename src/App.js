@@ -1373,12 +1373,7 @@ export default function App() {
     else setCart(cart.map(item => item.cartId === cartId ? { ...item, quantity: newQuantity } : item));
   };
   const handleRemoveFromCart = (cartId) => { setCart(cart.filter(item => item.cartId !== cartId)); };
-  const handleBack = () => {
-    if (view === 'products') setView('categories');
-    else if (view === 'cart') setView('products');
-    else if (view === 'checkout') setView('cart');
-    else if (view === 'categories') setView('home');
-  };
+  
   // Função para salvar pedido no banco de dados
   const salvarPedido = async () => {
     try {
