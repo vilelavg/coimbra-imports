@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { 
   ShoppingCart, 
-  ArrowLeft, 
   Plus, 
   Minus, 
   Trash2, 
@@ -13,7 +12,8 @@ import {
   User,
   Phone,
   Home,
-  Package
+  Package,
+  LayoutGrid
 } from 'lucide-react';
 
 // Configuração do Supabase
@@ -898,8 +898,8 @@ const PRODUCTS_BY_CATEGORY = {
   ],
 };
 
-// Header Component - REMOVIDO
-const Header = ({ onBack, showBack = false, cartCount = 0, onCartClick, onHomeClick }) => {
+// Header Component
+const Header = ({ showBack = false, cartCount = 0, onCartClick, onHomeClick, onCategoriesClick, showCategoriesButton = false }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -949,11 +949,11 @@ const Header = ({ onBack, showBack = false, cartCount = 0, onCartClick, onHomeCl
         pointerEvents: 'none'
       }} />
 
-      {/* Lado Esquerdo - Botão Voltar */}
+      {/* Lado Esquerdo - Botão Categorias (Grid) */}
       <div style={{ width: '60px' }}>
-        {showBack && (
+        {showCategoriesButton && (
           <button
-            onClick={onBack}
+            onClick={onCategoriesClick}
             style={{
               background: 'none',
               border: 'none',
@@ -964,7 +964,7 @@ const Header = ({ onBack, showBack = false, cartCount = 0, onCartClick, onHomeCl
               padding: '8px'
             }}
           >
-            <ArrowLeft style={{ width: '18px', height: '18px' }} />
+            <LayoutGrid style={{ width: '18px', height: '18px' }} />
           </button>
         )}
       </div>
@@ -1539,10 +1539,11 @@ export default function App() {
     <div style={{ minHeight: '100vh', width: '100%', background: '#000', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Header 
         showBack={false} 
-        onBack={() => {}} 
         cartCount={cartCount} 
         onCartClick={() => setView('cart')} 
-        onHomeClick={() => { setShowCover(true); setView('categories'); }} 
+        onHomeClick={() => { setShowCover(true); setView('categories'); }}
+        showCategoriesButton={false}
+        onCategoriesClick={() => setView('categories')}
       />
       
       {/* CAPA */}
@@ -1567,7 +1568,7 @@ export default function App() {
           }}>
           {/* Logo */}
             <div className="capa-logo" style={{ marginBottom: '40px' }}>
-              <img src={LOGO_URL} alt="Coimbra Imports" style={{ width: '243px', maxWidth: '90%', height: 'auto' }} />
+              <img src={LOGO_URL} alt="Coimbra Imports" className="capa-logo-img" style={{ width: '243px', maxWidth: '90%', height: 'auto' }} />
             </div>          
           {/* 3 Imagens - Grid para PC, Carrossel para Mobile */}
             <div className="capa-imagens capa-desktop" style={{ 
@@ -1739,12 +1740,14 @@ export default function App() {
 
   // RENDER PRODUCTS
 const renderProducts = () => (
-    <div style={{ minHeight: '100vh', width: '100%', background: '#000', padding: '40px 20px', paddingTop: '100px' }}>      <Header 
-        showBack={true} 
-        onBack={() => setView('categories')} 
+    <div style={{ minHeight: '100vh', width: '100%', background: '#000', padding: '40px 20px', paddingTop: '100px' }}>      
+      <Header 
+        showBack={false} 
         cartCount={cartCount} 
         onCartClick={() => setView('cart')} 
-        onHomeClick={() => setView('home')} 
+        onHomeClick={() => { setShowCover(true); setView('categories'); }}
+        showCategoriesButton={true}
+        onCategoriesClick={() => setView('categories')}
       />
       <h1 style={{ textAlign: 'center', color: '#FFFFFF', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '10px', fontFamily: "'Teko', sans-serif", fontSize: '2.5rem' }}>
         Coimbra <span style={{ color: '#fcb404' }}>Imports</span>
@@ -1758,12 +1761,14 @@ const renderProducts = () => (
 
   // RENDER CART
 const renderCart = () => (
-    <div style={{ minHeight: '100vh', width: '100%', background: '#000', padding: '40px 20px', paddingTop: '100px' }}>      <Header 
-        showBack={true} 
-        onBack={handleBack} 
+    <div style={{ minHeight: '100vh', width: '100%', background: '#000', padding: '40px 20px', paddingTop: '100px' }}>      
+      <Header 
+        showBack={false} 
         cartCount={cartCount} 
         onCartClick={() => setView('cart')} 
-        onHomeClick={() => setView('home')} 
+        onHomeClick={() => { setShowCover(true); setView('categories'); }}
+        showCategoriesButton={true}
+        onCategoriesClick={() => setView('categories')}
       />
       <h2 style={{ fontFamily: "'Teko', sans-serif", fontSize: '2.5rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '30px', fontWeight: '600', textAlign: 'center', color: '#fff' }}>
         Seu <span style={{ color: '#fcb404' }}>Carrinho</span>
@@ -1804,12 +1809,14 @@ const renderCart = () => (
 
   // RENDER CHECKOUT
 const renderCheckout = () => (
-    <div style={{ minHeight: '100vh', width: '100%', background: '#000', padding: '40px 20px', paddingTop: '100px', paddingBottom: '120px' }}>      <Header 
-        showBack={true} 
-        onBack={() => setView('cart')} 
+    <div style={{ minHeight: '100vh', width: '100%', background: '#000', padding: '40px 20px', paddingTop: '100px', paddingBottom: '120px' }}>
+      <Header 
+        showBack={false} 
         cartCount={cartCount} 
         onCartClick={() => setView('cart')} 
-        onHomeClick={() => setView('home')} 
+        onHomeClick={() => { setShowCover(true); setView('categories'); }}
+        showCategoriesButton={true}
+        onCategoriesClick={() => setView('categories')}
       />
       <h2 style={{ fontFamily: "'Teko', sans-serif", fontSize: '2.5rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '30px', fontWeight: '600', textAlign: 'center', color: '#fff' }}>
         Finalizar <span style={{ color: '#fcb404' }}>Pedido</span>
@@ -1886,8 +1893,7 @@ const renderCheckout = () => (
         .category-card:hover .action-arrow { opacity: 1; transform: translateY(0); }
         .category-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%; max-width: 1100px; padding: 0 15px; }
 @media (max-width: 768px) { .category-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; } }
-@media (max-width: 768px) { .category-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; } .capa-desktop { display: none !important; } .capa-carrossel { display: flex !important; } }@media (min-width: 769px) { .capa-logo { margin-top: 30px !important; } .capa-imagens { margin-top: -70px !important; } .capa-botao { margin-top: -30px !important; transform: scale(0.85); } }
-        }
+@media (max-width: 768px) { .category-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; } .capa-desktop { display: none !important; } .capa-carrossel { display: flex !important; } .capa-logo-img { transform: translateY(15%); } }@media (min-width: 769px) { .capa-logo { margin-top: 30px !important; } .capa-imagens { margin-top: -70px !important; } .capa-botao { margin-top: -30px !important; transform: scale(0.85); } }        }
 
         @media (min-width: 768px) {
           .products-grid {
