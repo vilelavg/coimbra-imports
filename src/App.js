@@ -899,7 +899,7 @@ const PRODUCTS_BY_CATEGORY = {
 };
 
 // Header Component
-const Header = ({ showBack = false, cartCount = 0, onCartClick, onHomeClick, onCategoriesClick, showCategoriesButton = false }) => {
+const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesButton = false }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -949,24 +949,8 @@ const Header = ({ showBack = false, cartCount = 0, onCartClick, onHomeClick, onC
         pointerEvents: 'none'
       }} />
 
-      {/* Lado Esquerdo - Botão Categorias (Grid) */}
+      {/* Lado Esquerdo - Vazio */}
       <div style={{ width: '60px' }}>
-        {showCategoriesButton && (
-          <button
-            onClick={onCategoriesClick}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#fcb404',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              padding: '8px'
-            }}
-          >
-            <LayoutGrid style={{ width: '18px', height: '18px' }} />
-          </button>
-        )}
       </div>
       
       {/* Centro - Vazio */}
@@ -978,7 +962,7 @@ const Header = ({ showBack = false, cartCount = 0, onCartClick, onHomeClick, onC
       }}>
       </div>
       
-      {/* Lado Direito - Ícones Home e Carrinho */}
+      {/* Lado Direito - Ícones Grid e Carrinho */}
       <div style={{ 
         display: 'flex', 
         gap: '15px', 
@@ -986,18 +970,20 @@ const Header = ({ showBack = false, cartCount = 0, onCartClick, onHomeClick, onC
         width: '60px',
         justifyContent: 'flex-end'
       }}>
-        <button
-          onClick={onHomeClick}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#fcb404',
-            cursor: 'pointer',
-            padding: '8px'
-          }}
-        >
-          <Home style={{ width: '18px', height: '18px' }} />
-        </button>
+        {showCategoriesButton && (
+          <button
+            onClick={onCategoriesClick}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#fcb404',
+              cursor: 'pointer',
+              padding: '8px'
+            }}
+          >
+            <LayoutGrid style={{ width: '18px', height: '18px' }} />
+          </button>
+        )}
         <button
           onClick={onCartClick}
           style={{
