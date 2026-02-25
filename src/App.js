@@ -142,7 +142,7 @@ const CATEGORY_CONFIG = {
     id: 10,
     name: 'Conjuntos',
     shortName: 'Conjuntos',
-    backgroundImage: 'backConjuntos.png',
+    backgroundImage: 'imagemConjuntos.png',
     tabela: 'conjuntos',
     folder: 'conjuntos'
   },
