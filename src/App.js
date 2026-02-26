@@ -451,7 +451,9 @@ const ProductCard = ({ product, onClick }) => {
 const SizeModal = ({ product, onClose, onAddToCart }) => {
   const [selectedSize, setSelectedSize] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
-  const sizes = ['P', 'M', 'G', 'GG', 'XG'];
+  
+  // Pega os tamanhos do produto, se não tiver usa o padrão
+  const sizes = product.sizes || ['P', 'M', 'G', 'GG'];
 
   const handleAdd = () => {
     if (selectedSize) {
@@ -521,10 +523,10 @@ const SizeModal = ({ product, onClose, onAddToCart }) => {
               Selecione o tamanho ideal para você:
             </p>
 
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', margin: '25px 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', margin: '25px 0', flexWrap: 'wrap' }}>
               {sizes.map((size) => (
                 <div key={size} onClick={() => setSelectedSize(size)} style={{
-                  width: '50px', height: '50px', border: selectedSize === size ? '2px solid #fcb404' : '2px solid #444',
+                  minWidth: '50px', height: '50px', padding: '0 10px', border: selectedSize === size ? '2px solid #fcb404' : '2px solid #444',
                   borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
                   color: selectedSize === size ? '#121212' : '#B0B0B0', fontFamily: "'Teko', sans-serif", fontWeight: 'bold',
                   fontSize: '1.2rem', backgroundColor: selectedSize === size ? '#fcb404' : 'transparent', transition: 'all 0.2s'
