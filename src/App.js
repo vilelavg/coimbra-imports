@@ -1252,6 +1252,11 @@ export default function App() {
     margin: 0 auto !important;
   }
 }
+  @media (max-width: 768px) {
+  input[type="text"] {
+    font-size: 16px !important;
+  }
+}
         @media (max-width: 768px) { .category-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; } .capa-desktop { display: none !important; } .capa-carrossel { display: flex !important; } .capa-logo-img { transform: translateY(15%); } .header-search-container { justify-content: flex-start !important; } .category-brasileiros { font-size: 1.1rem !important; } }
 
         @media (min-width: 1024px) {
