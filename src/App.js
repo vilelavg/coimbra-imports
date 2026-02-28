@@ -185,7 +185,7 @@ const fetchProductsByCategory = async (categoryId) => {
 };
 
 // Header Component
-const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesButton = false, showSearchBar = false, searchTerm = '', onSearchChange, onSearchSubmit }) => {
+const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesButton = false, showSearchBar = false, searchTerm = '', onSearchChange, onSearchSubmit, onClearSearch }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -279,8 +279,8 @@ const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesB
             {searchTerm && (
               <button
                 onClick={() => {
-                  onSearchChange('');
-                  onSearchSubmit();
+                  if (onClearSearch) onClearSearch();
+                  document.activeElement.blur();
                 }}
                 style={{
                   background: 'none',
@@ -470,7 +470,7 @@ const ProductCard = ({ product, onClick }) => {
 const SizeModal = ({ product, onClose, onAddToCart }) => {
   const [selectedSize, setSelectedSize] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
-  
+
   // Pega os tamanhos do produto, se não tiver usa o padrão
   const sizes = product.sizes || ['P', 'M', 'G', 'GG'];
 
@@ -1081,6 +1081,7 @@ export default function App() {
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         onSearchSubmit={handleSearchSubmit}
+        onClearSearch={() => { setSearchTerm(''); setSearchFilter(''); }}
       />
       <h1 style={{ textAlign: 'center', color: '#FFFFFF', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '10px', fontFamily: "'Teko', sans-serif", fontSize: '2.5rem' }}>
         Coimbra <span style={{ color: '#fcb404' }}>Imports</span>
