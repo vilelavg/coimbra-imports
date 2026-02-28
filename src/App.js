@@ -276,6 +276,25 @@ const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesB
                 color: '#000'
               }}
             />
+            {searchTerm && (
+              <button
+                onClick={() => {
+                  onSearchChange('');
+                  onSearchSubmit();
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '8px 4px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <span style={{ color: '#888', fontSize: '18px', fontWeight: 'bold' }}>×</span>
+              </button>
+            )}
             <button
               onClick={onSearchSubmit}
               style={{
