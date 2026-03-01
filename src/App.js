@@ -14,7 +14,8 @@ import {
   Package,
   LayoutGrid,
   Home,
-  Search
+  Search,
+  ArrowLeftCircle
 } from 'lucide-react';
 
 // Configuração do Supabase
@@ -185,7 +186,7 @@ const fetchProductsByCategory = async (categoryId) => {
 };
 
 // Header Component
-const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesButton = false, showSearchBar = false, searchTerm = '', onSearchChange, onSearchSubmit, onClearSearch }) => {
+const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesButton = false, showSearchBar = false, searchTerm = '', onSearchChange, onSearchSubmit, onClearSearch, showBackButton = false, onBackClick }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -230,6 +231,24 @@ const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesB
       minHeight: '45px',
       transition: 'top 0.3s ease-in-out',
     }}>
+      {/* Botão Voltar */}
+      {showBackButton && (
+        <button
+          onClick={onBackClick}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#fcb404',
+            cursor: 'pointer',
+            padding: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            marginRight: '10px'
+          }}
+        >
+          <ArrowLeftCircle style={{ width: '24px', height: '24px' }} />
+        </button>
+      )}
       {/* Borda com degradê */}
       <div style={{
         position: 'absolute',
@@ -661,6 +680,8 @@ export default function App() {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchFilter, setSearchFilter] = useState('');
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
+
   // Estado para produtos carregados do Supabase
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
@@ -847,10 +868,7 @@ export default function App() {
     }
   };
   const handleSendWhatsApp = async () => {
-    if (!formData.name || !formData.phone || !formData.street || !formData.number || !formData.cep || !formData.neighborhood || !formData.city) {
-      alert('Por favor, preencha todos os campos obrigatórios.');
-      return;
-    }
+    setShowWhatsAppModal(true);
 
     // Salvar pedido no banco de dados
     const idPedido = await salvarPedido();
@@ -871,16 +889,21 @@ export default function App() {
       `📍 *Endereço de Entrega:*\n${endereco}\n\n` +
       `📦 *Itens do Pedido:*\n${itensTexto}\n\n` +
       `💰 *Total: R$ ${cartTotal.toFixed(2).replace('.', ',')}*\n\n` +
+      `💳 *Pagamento:* A combinar\n\n` +
       `Aguardo confirmação! ⚽`;
 
     const urlWhatsApp = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(mensagem)}`;
-    window.open(urlWhatsApp, '_blank');
 
-    // Limpar carrinho após envio
-    setCart([]);
-    setFormData({ name: '', phone: '', cep: '', street: '', number: '', complement: '', neighborhood: '', city: '' });
-    setView('categories');
-    setShowCover(true);
+    // Aguarda 2 segundos mostrando o modal antes de redirecionar
+    setTimeout(() => {
+      window.open(urlWhatsApp, '_blank');
+      setShowWhatsAppModal(false);
+      // Limpar carrinho após envio
+      setCart([]);
+      setFormData({ name: '', phone: '', cep: '', street: '', number: '', complement: '', neighborhood: '', city: '' });
+      setView('categories');
+      setShowCover(true);
+    }, 2000);
   };
   // RENDER CATEGORIES
   const renderCategories = () => (
@@ -1082,6 +1105,8 @@ export default function App() {
         onSearchChange={setSearchTerm}
         onSearchSubmit={handleSearchSubmit}
         onClearSearch={() => { setSearchTerm(''); setSearchFilter(''); }}
+        showBackButton={true}
+        onBackClick={() => setView('categories')}
       />
       <h1 style={{ textAlign: 'center', color: '#FFFFFF', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '10px', fontFamily: "'Teko', sans-serif", fontSize: '2.5rem' }}>
         Coimbra <span style={{ color: '#fcb404' }}>Imports</span>
@@ -1114,6 +1139,8 @@ export default function App() {
         onHomeClick={() => { setShowCover(true); setView('categories'); }}
         showCategoriesButton={true}
         onCategoriesClick={() => setView('categories')}
+        showBackButton={true}
+        onBackClick={() => setView('products')}
       />
       <h2 style={{ fontFamily: "'Teko', sans-serif", fontSize: '2.5rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '30px', fontWeight: '600', textAlign: 'center', color: '#fff' }}>
         Seu <span style={{ color: '#fcb404' }}>Carrinho</span>
@@ -1162,6 +1189,8 @@ export default function App() {
         onHomeClick={() => { setShowCover(true); setView('categories'); }}
         showCategoriesButton={true}
         onCategoriesClick={() => setView('categories')}
+        showBackButton={true}
+        onBackClick={() => setView('products')}
       />
       <h2 style={{ fontFamily: "'Teko', sans-serif", fontSize: '2.5rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '30px', fontWeight: '600', textAlign: 'center', color: '#fff' }}>
         Finalizar <span style={{ color: '#fcb404' }}>Pedido</span>
@@ -1212,7 +1241,393 @@ export default function App() {
         </div>
       </div>
       <div style={{ position: 'fixed', bottom: '0', left: '0', right: '0', background: 'linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.8), transparent)', padding: '32px 16px 16px' }}>
-        <button onClick={handleSendWhatsApp} style={{ width: '100%', maxWidth: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', margin: '0 auto', padding: '16px', backgroundColor: '#fcb404', color: '#000', fontFamily: "'Teko', sans-serif", fontWeight: '600', fontSize: '1.3rem', textTransform: 'uppercase', borderRadius: '16px', border: 'none', cursor: 'pointer', boxShadow: '0 4px 15px rgba(252, 180, 4, 0.3)' }}>
+        <button onClick={() => {
+          if (!formData.name || !formData.phone || !formData.street || !formData.number || !formData.cep || !formData.neighborhood || !formData.city) {
+            alert('Por favor, preencha todos os campos obrigatórios.');
+            return;
+          }
+          setView('payment');
+        }} style={{ width: '100%', maxWidth: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', margin: '0 auto', padding: '16px', backgroundColor: '#fcb404', color: '#000', fontFamily: "'Teko', sans-serif", fontWeight: '600', fontSize: '1.3rem', textTransform: 'uppercase', borderRadius: '16px', border: 'none', cursor: 'pointer', boxShadow: '0 4px 15px rgba(252, 180, 4, 0.3)' }}>
+          Pagamento
+        </button>
+      </div>
+    </div>
+  );
+
+  // RENDER PAYMENT
+  const renderPayment = () => (
+    <div style={{ minHeight: '100vh', width: '100%', background: '#000', padding: '40px 20px', paddingTop: '100px' }}>
+      <Header
+        cartCount={cartCount}
+        onCartClick={() => setView('cart')}
+        showCategoriesButton={true}
+        onCategoriesClick={() => { setView('categories'); setSearchTerm(''); setSearchFilter(''); }}
+        showBackButton={true}
+        onBackClick={() => setView('checkout')}
+      />
+      <h2 style={{ fontFamily: "'Teko', sans-serif", fontSize: '2.5rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '30px', fontWeight: '600', textAlign: 'center', color: '#fff' }}>
+        Forma de <span style={{ color: '#fcb404' }}>Pagamento</span>
+      </h2>
+      <div style={{ maxWidth: '500px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {/* Card PIX */}
+        <div
+          onClick={() => setView('pix')}
+          style={{
+            backgroundColor: 'rgba(28, 28, 28, 0.9)',
+            borderRadius: '16px',
+            padding: '24px',
+            border: '1px solid #333',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '20px'
+          }}
+        >
+          <div style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#fcb404',
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#000' }}>PIX</span>
+          </div>
+          <div>
+            <h3 style={{ color: '#fff', fontFamily: "'Teko', sans-serif", fontSize: '1.5rem', textTransform: 'uppercase', margin: 0 }}>
+              Pagamento via PIX
+            </h3>
+            <p style={{ color: '#888', fontFamily: "'Teko', sans-serif", fontSize: '1rem', margin: '5px 0 0 0' }}>
+              Pagamento instantâneo
+            </p>
+          </div>
+        </div>
+
+        {/* Card Outras Formas */}
+        <div
+          onClick={handleSendWhatsApp}
+          style={{
+            backgroundColor: 'rgba(28, 28, 28, 0.9)',
+            borderRadius: '16px',
+            padding: '24px',
+            border: '1px solid #333',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '20px'
+          }}
+        >
+          <div style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#25D366',
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <Send style={{ width: '28px', height: '28px', color: '#fff' }} />
+          </div>
+          <div>
+            <h3 style={{ color: '#fff', fontFamily: "'Teko', sans-serif", fontSize: '1.5rem', textTransform: 'uppercase', margin: 0 }}>
+              Outras formas de pagamento
+            </h3>
+            <p style={{ color: '#888', fontFamily: "'Teko', sans-serif", fontSize: '1rem', margin: '5px 0 0 0' }}>
+              Combine com o vendedor via WhatsApp
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal de redirecionamento WhatsApp */}
+      {showWhatsAppModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.9)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1001
+        }}>
+          <div style={{
+            backgroundColor: '#1E1E1E',
+            padding: '40px',
+            borderRadius: '16px',
+            textAlign: 'center',
+            border: '1px solid #333',
+            maxWidth: '320px'
+          }}>
+            <div style={{
+              width: '60px',
+              height: '60px',
+              backgroundColor: 'rgba(37, 211, 102, 0.2)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 20px'
+            }}>
+              <Send style={{ width: '30px', height: '30px', color: '#25D366' }} />
+            </div>
+            <h3 style={{ color: '#fff', fontFamily: "'Teko', sans-serif", fontSize: '1.5rem', marginBottom: '10px' }}>
+              Enviando pedido...
+            </h3>
+            <p style={{ color: '#888', fontFamily: "'Teko', sans-serif", fontSize: '1.1rem' }}>
+              Você será redirecionado para o WhatsApp
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  // RENDER PIX
+  const renderPix = () => (
+    <div style={{ minHeight: '100vh', width: '100%', background: '#000', padding: '40px 20px', paddingTop: '100px' }}>
+      <Header
+        cartCount={cartCount}
+        onCartClick={() => setView('cart')}
+        showCategoriesButton={true}
+        onCategoriesClick={() => { setView('categories'); setSearchTerm(''); setSearchFilter(''); }}
+        showBackButton={true}
+        onBackClick={() => setView('checkout')}
+      />
+      <h2 style={{ fontFamily: "'Teko', sans-serif", fontSize: '2.5rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '30px', fontWeight: '600', textAlign: 'center', color: '#fff' }}>
+        Pagamento <span style={{ color: '#fcb404' }}>PIX</span>
+      </h2>
+      <div style={{ maxWidth: '400px', margin: '0 auto', textAlign: 'center' }}>
+        {/* Valor */}
+        <div style={{
+          backgroundColor: 'rgba(28, 28, 28, 0.9)',
+          borderRadius: '16px',
+          padding: '20px',
+          border: '1px solid #333',
+          marginBottom: '20px'
+        }}>
+          <p style={{ color: '#888', fontFamily: "'Teko', sans-serif", fontSize: '1.1rem', margin: 0 }}>Valor a pagar:</p>
+          <p style={{ color: '#fcb404', fontFamily: "'Teko', sans-serif", fontSize: '2.5rem', fontWeight: 'bold', margin: '10px 0 0 0' }}>
+            R$ {cartTotal.toFixed(2).replace('.', ',')}
+          </p>
+        </div>
+
+        {/* QR Code / Chave PIX */}
+        <div style={{
+          backgroundColor: 'rgba(28, 28, 28, 0.9)',
+          borderRadius: '16px',
+          padding: '24px',
+          border: '1px solid #333',
+          marginBottom: '20px'
+        }}>
+          <p style={{ color: '#fff', fontFamily: "'Teko', sans-serif", fontSize: '1.3rem', marginBottom: '15px' }}>
+            Chave PIX (Telefone):
+          </p>
+          <div style={{
+            backgroundColor: '#2C2C2C',
+            padding: '15px',
+            borderRadius: '8px',
+            marginBottom: '15px'
+          }}>
+            <p style={{ color: '#fcb404', fontFamily: "'Teko', sans-serif", fontSize: '1.4rem', margin: 0, wordBreak: 'break-all' }}>
+              11966007429
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText('11966007429');
+              alert('Chave PIX copiada!');
+            }}
+            style={{
+              width: '100%',
+              padding: '12px',
+              backgroundColor: '#333',
+              color: '#fff',
+              fontFamily: "'Teko', sans-serif",
+              fontWeight: '600',
+              fontSize: '1.1rem',
+              textTransform: 'uppercase',
+              borderRadius: '8px',
+              border: '1px solid #444',
+              cursor: 'pointer'
+            }}
+          >
+            Copiar Chave PIX
+          </button>
+        </div>
+
+        {/* Instruções */}
+        <div style={{
+          backgroundColor: 'rgba(28, 28, 28, 0.9)',
+          borderRadius: '16px',
+          padding: '20px',
+          border: '1px solid #333',
+          marginBottom: '20px',
+          textAlign: 'left'
+        }}>
+          <p style={{ color: '#fff', fontFamily: "'Teko', sans-serif", fontSize: '1.2rem', marginBottom: '10px' }}>
+            Instruções:
+          </p>
+          <p style={{ color: '#888', fontFamily: "'Teko', sans-serif", fontSize: '1rem', lineHeight: '1.6' }}>
+            1. Copie a chave PIX acima<br />
+            2. Abra o app do seu banco<br />
+            3. Faça o pagamento via PIX<br />
+            4. Clique em "Confirmar Pagamento"
+          </p>
+        </div>
+
+        {/* Botão Confirmar */}
+        <button
+          onClick={() => setView('resumo')}
+          style={{
+            width: '100%',
+            padding: '16px',
+            backgroundColor: '#fcb404',
+            color: '#000',
+            fontFamily: "'Teko', sans-serif",
+            fontWeight: '600',
+            fontSize: '1.3rem',
+            textTransform: 'uppercase',
+            borderRadius: '16px',
+            border: 'none',
+            cursor: 'pointer',
+            boxShadow: '0 4px 15px rgba(252, 180, 4, 0.3)'
+          }}
+        >
+          Confirmar Pagamento
+        </button>
+      </div>
+    </div>
+  );
+  // RENDER RESUMO
+  const renderResumo = () => (
+    <div style={{ minHeight: '100vh', width: '100%', background: '#000', padding: '40px 20px', paddingTop: '100px', paddingBottom: '120px' }}>
+      <Header
+        cartCount={cartCount}
+        onCartClick={() => setView('cart')}
+        showCategoriesButton={true}
+        onCategoriesClick={() => { setView('categories'); setSearchTerm(''); setSearchFilter(''); }}
+        showBackButton={true}
+        onBackClick={() => setView('pix')}
+      />
+      <h2 style={{ fontFamily: "'Teko', sans-serif", fontSize: '2.5rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '30px', fontWeight: '600', textAlign: 'center', color: '#fff' }}>
+        Resumo do <span style={{ color: '#fcb404' }}>Pedido</span>
+      </h2>
+      <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Dados do Cliente */}
+          <div style={{ backgroundColor: 'rgba(28, 28, 28, 0.9)', borderRadius: '16px', padding: '16px', border: '1px solid #333' }}>
+            <h3 style={{ color: '#fcb404', fontWeight: 'bold', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: "'Teko', sans-serif", fontSize: '1.3rem' }}>
+              <User style={{ width: '20px', height: '20px' }} /> Dados do Cliente
+            </h3>
+            <div style={{ color: '#ccc', fontFamily: "'Teko', sans-serif", fontSize: '1.1rem' }}>
+              <p style={{ margin: '8px 0' }}><strong style={{ color: '#fff' }}>Nome:</strong> {formData.name}</p>
+              <p style={{ margin: '8px 0' }}><strong style={{ color: '#fff' }}>Telefone:</strong> {formData.phone}</p>
+            </div>
+          </div>
+
+          {/* Endereço */}
+          <div style={{ backgroundColor: 'rgba(28, 28, 28, 0.9)', borderRadius: '16px', padding: '16px', border: '1px solid #333' }}>
+            <h3 style={{ color: '#fcb404', fontWeight: 'bold', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: "'Teko', sans-serif", fontSize: '1.3rem' }}>
+              <MapPin style={{ width: '20px', height: '20px' }} /> Endereço de Entrega
+            </h3>
+            <div style={{ color: '#ccc', fontFamily: "'Teko', sans-serif", fontSize: '1.1rem' }}>
+              <p style={{ margin: '8px 0' }}>{formData.street}, {formData.number}{formData.complement ? ` - ${formData.complement}` : ''}</p>
+              <p style={{ margin: '8px 0' }}>{formData.neighborhood} - {formData.city}</p>
+              <p style={{ margin: '8px 0' }}>CEP: {formData.cep}</p>
+            </div>
+          </div>
+
+          {/* Itens do Pedido */}
+          <div style={{ backgroundColor: 'rgba(28, 28, 28, 0.9)', borderRadius: '16px', padding: '16px', border: '1px solid #333' }}>
+            <h3 style={{ color: '#fcb404', fontWeight: 'bold', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: "'Teko', sans-serif", fontSize: '1.3rem' }}>
+              <Package style={{ width: '20px', height: '20px' }} /> Itens do Pedido
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {cart.map((item) => (
+                <div key={item.cartId} style={{ display: 'flex', justifyContent: 'space-between', color: '#ccc', fontFamily: "'Teko', sans-serif", fontSize: '1.1rem' }}>
+                  <span>{item.quantity}x {item.name} ({item.size})</span>
+                  <span>R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Pagamento */}
+          <div style={{ backgroundColor: 'rgba(28, 28, 28, 0.9)', borderRadius: '16px', padding: '16px', border: '1px solid #333' }}>
+            <h3 style={{ color: '#fcb404', fontWeight: 'bold', marginBottom: '12px', fontFamily: "'Teko', sans-serif", fontSize: '1.3rem' }}>
+              Pagamento
+            </h3>
+            <p style={{ color: '#25D366', fontFamily: "'Teko', sans-serif", fontSize: '1.2rem', margin: 0 }}>
+              ✓ PIX Realizado
+            </p>
+          </div>
+
+          {/* Total */}
+          <div style={{ backgroundColor: 'rgba(252, 180, 4, 0.1)', borderRadius: '16px', padding: '16px', border: '1px solid #fcb404' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ color: '#fff', fontWeight: 'bold', fontFamily: "'Teko', sans-serif", fontSize: '1.5rem' }}>Total</span>
+              <span style={{ color: '#fcb404', fontWeight: 'bold', fontFamily: "'Teko', sans-serif", fontSize: '2rem' }}>R$ {cartTotal.toFixed(2).replace('.', ',')}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Botão Enviar */}
+      <div style={{ position: 'fixed', bottom: '0', left: '0', right: '0', background: 'linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.8), transparent)', padding: '32px 16px 16px' }}>
+        <button
+          onClick={async () => {
+            const idPedido = await salvarPedido();
+
+            const endereco = `${formData.street}, ${formData.number}${formData.complement ? ` - ${formData.complement}` : ''}, ${formData.neighborhood}, ${formData.city} - CEP: ${formData.cep}`;
+
+            const itensTexto = cart.map(item =>
+              `• ${item.quantity}x ${item.name} (Tam: ${item.size}) - R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}`
+            ).join('\n');
+
+            const mensagem = `🛒 *PEDIDO PAGO VIA PIX${idPedido ? ` #${idPedido}` : ''}*\n\n` +
+              `👤 *Cliente:* ${formData.name}\n` +
+              `📱 *Telefone:* ${formData.phone}\n\n` +
+              `📍 *Endereço de Entrega:*\n${endereco}\n\n` +
+              `📦 *Itens do Pedido:*\n${itensTexto}\n\n` +
+              `💰 *Total: R$ ${cartTotal.toFixed(2).replace('.', ',')}*\n\n` +
+              `✅ *Pagamento:* PIX realizado\n\n` +
+              `Aguardo confirmação! ⚽`;
+
+            const urlWhatsApp = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(mensagem)}`;
+            window.open(urlWhatsApp, '_blank');
+
+            setCart([]);
+            setFormData({ name: '', phone: '', cep: '', street: '', number: '', complement: '', neighborhood: '', city: '' });
+            setView('categories');
+            setShowCover(true);
+          }}
+          style={{
+            width: '100%',
+            maxWidth: '600px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '12px',
+            margin: '0 auto',
+            padding: '16px',
+            backgroundColor: '#25D366',
+            color: '#fff',
+            fontFamily: "'Teko', sans-serif",
+            fontWeight: '600',
+            fontSize: '1.3rem',
+            textTransform: 'uppercase',
+            borderRadius: '16px',
+            border: 'none',
+            cursor: 'pointer',
+            boxShadow: '0 4px 15px rgba(37, 211, 102, 0.3)'
+          }}
+        >
           <Send style={{ width: '20px', height: '20px' }} />
           Enviar Pedido via WhatsApp
         </button>
@@ -1270,6 +1685,10 @@ export default function App() {
       {view === 'products' && renderProducts()}
       {view === 'cart' && renderCart()}
       {view === 'checkout' && renderCheckout()}
+      {view === 'payment' && renderPayment()}
+      {view === 'pix' && renderPix()}
+      {view === 'pix' && renderPix()}
+      {view === 'resumo' && renderResumo()}
       {selectedProduct && <SizeModal product={selectedProduct} onClose={() => setSelectedProduct(null)} onAddToCart={handleAddToCart} />}
     </div>
   );
