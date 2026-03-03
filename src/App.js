@@ -13,7 +13,6 @@ import {
   Phone,
   Package,
   LayoutGrid,
-  Home,
   Search,
   ArrowLeftCircle
 } from 'lucide-react';
@@ -880,44 +879,7 @@ export default function App() {
       return null;
     }
   };
-  const handleSendWhatsApp = async () => {
-    setShowWhatsAppModal(true);
-
-    // Salvar pedido no banco de dados
-    const idPedido = await salvarPedido();
-    if (idPedido) {
-      console.log('Pedido #' + idPedido + ' salvo com sucesso!');
-    }
-
-    // Montar mensagem do WhatsApp
-    const endereco = `${formData.street}, ${formData.number}${formData.complement ? ` - ${formData.complement}` : ''}, ${formData.neighborhood}, ${formData.city} - CEP: ${formData.cep}`;
-
-    const itensTexto = cart.map(item =>
-      `• ${item.quantity}x ${item.name} (Tam: ${item.size}) - R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}`
-    ).join('\n');
-
-    const mensagem = `🛒 *NOVO PEDIDO${idPedido ? ` #${idPedido}` : ''}*\n\n` +
-      `👤 *Cliente:* ${formData.name}\n` +
-      `📱 *Telefone:* ${formData.phone}\n\n` +
-      `📍 *Endereço de Entrega:*\n${endereco}\n\n` +
-      `📦 *Itens do Pedido:*\n${itensTexto}\n\n` +
-      `💰 *Total: R$ ${cartTotal.toFixed(2).replace('.', ',')}*\n\n` +
-      `💳 *Pagamento:* A combinar\n\n` +
-      `Aguardo confirmação! ⚽`;
-
-    const urlWhatsApp = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(mensagem)}`;
-
-    // Aguarda 2 segundos mostrando o modal antes de redirecionar
-    setTimeout(() => {
-      window.open(urlWhatsApp, '_blank');
-      setShowWhatsAppModal(false);
-      // Limpar carrinho após envio
-      setCart([]);
-      setFormData({ name: '', phone: '', cep: '', street: '', number: '', complement: '', neighborhood: '', city: '' });
-      setView('categories');
-      setShowCover(true);
-    }, 2000);
-  };
+  
   // RENDER CATEGORIES
   const renderCategories = () => (
     <div style={{ minHeight: '100vh', width: '100%', background: '#000', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
