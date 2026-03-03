@@ -706,6 +706,7 @@ export default function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchFilter, setSearchFilter] = useState('');
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('');
 
   // Estado para produtos carregados do Supabase
   const [products, setProducts] = useState([]);
@@ -721,8 +722,7 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [cart, setCart] = useState([]);
-  const [formData, setFormData] = useState({ name: '', phone: '', cep: '', street: '', number: '', complement: '', neighborhood: '', city: '' });
-
+  const [formData, setFormData] = useState({ name: '', phone: '', email: '' });
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
   const cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
 
@@ -794,12 +794,7 @@ export default function App() {
           .from('clientes')
           .update({
             nome: formData.name,
-            rua: formData.street,
-            numero: formData.number,
-            complemento: formData.complement || null,
-            cep: formData.cep,
-            bairro: formData.neighborhood,
-            cidade: formData.city
+            email: formData.email
           })
           .eq('id_cliente', idCliente);
       } else {
@@ -809,12 +804,7 @@ export default function App() {
           .insert({
             nome: formData.name,
             telefone: formData.phone,
-            rua: formData.street,
-            numero: formData.number,
-            complemento: formData.complement || null,
-            cep: formData.cep,
-            bairro: formData.neighborhood,
-            cidade: formData.city
+            email: formData.email
           })
           .select('id_cliente')
           .single();
@@ -838,7 +828,6 @@ export default function App() {
 
       // 3. Buscar código dos produtos e inserir itens do pedido
       const itensPedido = await Promise.all(cart.map(async (item) => {
-        // Mapear categoria para nome da tabela
         const tabelasPorCategoria = {
           'Times Europeus/Outros': 'europeus',
           'Times Brasileiros': 'times_brasileiros',
@@ -854,7 +843,6 @@ export default function App() {
         let codigoProduto = null;
 
         if (tabela) {
-          // Buscar código do produto pela descrição
           const { data: produto } = await supabase
             .from(tabela)
             .select('codigo')
@@ -1215,7 +1203,7 @@ export default function App() {
         showCategoriesButton={true}
         onCategoriesClick={() => setView('categories')}
         showBackButton={true}
-        onBackClick={() => setView('products')}
+        onBackClick={() => setView('cart')}
       />
       <h2 style={{ fontFamily: "'Teko', sans-serif", fontSize: '2.5rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '30px', fontWeight: '600', textAlign: 'center', color: '#fff' }}>
         Finalizar <span style={{ color: '#fcb404' }}>Pedido</span>
@@ -1229,21 +1217,7 @@ export default function App() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <InputField icon={User} label="Nome Completo *" placeholder="Seu nome completo" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
               <InputField icon={Phone} label="Telefone (WhatsApp) *" placeholder="(00) 00000-0000" type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
-            </div>
-          </div>
-          <div style={{ backgroundColor: 'rgba(28, 28, 28, 0.9)', borderRadius: '16px', padding: '16px', border: '1px solid #333' }}>
-            <h3 style={{ color: '#fcb404', fontWeight: 'bold', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: "'Teko', sans-serif", fontSize: '1.3rem' }}>
-              <MapPin style={{ width: '20px', height: '20px' }} /> Endereço de Entrega
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <InputField icon={Home} label="Rua *" placeholder="Nome da rua" value={formData.street} onChange={(e) => setFormData({ ...formData, street: e.target.value })} />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <InputField icon={Home} label="Número *" placeholder="Nº" value={formData.number} onChange={(e) => setFormData({ ...formData, number: e.target.value })} />
-                <InputField icon={Home} label="Complemento" placeholder="Apto, Bloco..." value={formData.complement} onChange={(e) => setFormData({ ...formData, complement: e.target.value })} />
-              </div>
-              <InputField icon={MapPin} label="CEP *" placeholder="00000-000" value={formData.cep} onChange={(e) => setFormData({ ...formData, cep: e.target.value })} />
-              <InputField icon={MapPin} label="Bairro *" placeholder="Seu bairro" value={formData.neighborhood} onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })} />
-              <InputField icon={MapPin} label="Cidade *" placeholder="Sua cidade" value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} />
+              <InputField icon={MapPin} label="Email *" placeholder="seu@email.com" type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
             </div>
           </div>
           <div style={{ backgroundColor: 'rgba(28, 28, 28, 0.9)', borderRadius: '16px', padding: '16px', border: '1px solid #333' }}>
@@ -1267,7 +1241,7 @@ export default function App() {
       </div>
       <div style={{ position: 'fixed', bottom: '0', left: '0', right: '0', background: 'linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.8), transparent)', padding: '32px 16px 16px' }}>
         <button onClick={() => {
-          if (!formData.name || !formData.phone || !formData.street || !formData.number || !formData.cep || !formData.neighborhood || !formData.city) {
+          if (!formData.name || !formData.phone || !formData.email) {
             alert('Por favor, preencha todos os campos obrigatórios.');
             return;
           }
@@ -1332,7 +1306,38 @@ export default function App() {
 
         {/* Card Outras Formas */}
         <div
-          onClick={handleSendWhatsApp}
+          onClick={async () => {
+            setShowWhatsAppModal(true);
+            setPaymentMethod('A combinar');
+
+            // Salvar pedido no banco de dados
+            const idPedido = await salvarPedido();
+
+            // Montar mensagem do WhatsApp
+            const itensTexto = cart.map(item =>
+              `• ${item.quantity}x ${item.name} (Tam: ${item.size}) - R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}`
+            ).join('\n');
+
+            const mensagem = `🛒 *NOVO PEDIDO${idPedido ? ` #${idPedido}` : ''}*\n\n` +
+              `👤 *Cliente:* ${formData.name}\n` +
+              `📱 *Telefone:* ${formData.phone}\n` +
+              `📧 *Email:* ${formData.email}\n\n` +
+              `📦 *Itens do Pedido:*\n${itensTexto}\n\n` +
+              `💰 *Total: R$ ${cartTotal.toFixed(2).replace('.', ',')}*\n\n` +
+              `💳 *Pagamento:* A combinar\n\n` +
+              `Aguardo confirmação! ⚽`;
+
+            const urlWhatsApp = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(mensagem)}`;
+
+            setTimeout(() => {
+              window.open(urlWhatsApp, '_blank');
+              setShowWhatsAppModal(false);
+              setCart([]);
+              setFormData({ name: '', phone: '', email: '' });
+              setView('categories');
+              setShowCover(true);
+            }, 2000);
+          }}
           style={{
             backgroundColor: 'rgba(28, 28, 28, 0.9)',
             borderRadius: '16px',
@@ -1551,20 +1556,9 @@ export default function App() {
               <User style={{ width: '20px', height: '20px' }} /> Dados do Cliente
             </h3>
             <div style={{ color: '#ccc', fontFamily: "'Teko', sans-serif", fontSize: '1.1rem' }}>
-              <p style={{ margin: '8px 0' }}><strong style={{ color: '#fff' }}>Nome:</strong> {formData.name}</p>
-              <p style={{ margin: '8px 0' }}><strong style={{ color: '#fff' }}>Telefone:</strong> {formData.phone}</p>
-            </div>
-          </div>
-
-          {/* Endereço */}
-          <div style={{ backgroundColor: 'rgba(28, 28, 28, 0.9)', borderRadius: '16px', padding: '16px', border: '1px solid #333' }}>
-            <h3 style={{ color: '#fcb404', fontWeight: 'bold', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: "'Teko', sans-serif", fontSize: '1.3rem' }}>
-              <MapPin style={{ width: '20px', height: '20px' }} /> Endereço de Entrega
-            </h3>
-            <div style={{ color: '#ccc', fontFamily: "'Teko', sans-serif", fontSize: '1.1rem' }}>
-              <p style={{ margin: '8px 0' }}>{formData.street}, {formData.number}{formData.complement ? ` - ${formData.complement}` : ''}</p>
-              <p style={{ margin: '8px 0' }}>{formData.neighborhood} - {formData.city}</p>
-              <p style={{ margin: '8px 0' }}>CEP: {formData.cep}</p>
+              <p style={{ margin: '5px 0' }}><strong>Nome:</strong> {formData.name}</p>
+              <p style={{ margin: '5px 0' }}><strong>Telefone:</strong> {formData.phone}</p>
+              <p style={{ margin: '5px 0' }}><strong>Email:</strong> {formData.email}</p>
             </div>
           </div>
 
@@ -1585,78 +1579,109 @@ export default function App() {
 
           {/* Pagamento */}
           <div style={{ backgroundColor: 'rgba(28, 28, 28, 0.9)', borderRadius: '16px', padding: '16px', border: '1px solid #333' }}>
-            <h3 style={{ color: '#fcb404', fontWeight: 'bold', marginBottom: '12px', fontFamily: "'Teko', sans-serif", fontSize: '1.3rem' }}>
-              Pagamento
+            <h3 style={{ color: '#fcb404', fontWeight: 'bold', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: "'Teko', sans-serif", fontSize: '1.3rem' }}>
+              💳 Forma de Pagamento
             </h3>
             <p style={{ color: '#25D366', fontFamily: "'Teko', sans-serif", fontSize: '1.2rem', margin: 0 }}>
-              ✓ PIX Realizado
+              {paymentMethod} - Realizado ✓
             </p>
           </div>
 
           {/* Total */}
           <div style={{ backgroundColor: 'rgba(252, 180, 4, 0.1)', borderRadius: '16px', padding: '16px', border: '1px solid #fcb404' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: '#fff', fontWeight: 'bold', fontFamily: "'Teko', sans-serif", fontSize: '1.5rem' }}>Total</span>
+              <span style={{ color: '#fff', fontWeight: 'bold', fontFamily: "'Teko', sans-serif", fontSize: '1.5rem' }}>TOTAL</span>
               <span style={{ color: '#fcb404', fontWeight: 'bold', fontFamily: "'Teko', sans-serif", fontSize: '2rem' }}>R$ {cartTotal.toFixed(2).replace('.', ',')}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Botão Enviar */}
+      {/* Botão Enviar via WhatsApp */}
       <div style={{ position: 'fixed', bottom: '0', left: '0', right: '0', background: 'linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.8), transparent)', padding: '32px 16px 16px' }}>
         <button
           onClick={async () => {
+            setShowWhatsAppModal(true);
+
+            // Salvar pedido no banco de dados
             const idPedido = await salvarPedido();
 
-            const endereco = `${formData.street}, ${formData.number}${formData.complement ? ` - ${formData.complement}` : ''}, ${formData.neighborhood}, ${formData.city} - CEP: ${formData.cep}`;
-
+            // Montar mensagem do WhatsApp
             const itensTexto = cart.map(item =>
               `• ${item.quantity}x ${item.name} (Tam: ${item.size}) - R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}`
             ).join('\n');
 
             const mensagem = `🛒 *PEDIDO PAGO VIA PIX${idPedido ? ` #${idPedido}` : ''}*\n\n` +
               `👤 *Cliente:* ${formData.name}\n` +
-              `📱 *Telefone:* ${formData.phone}\n\n` +
-              `📍 *Endereço de Entrega:*\n${endereco}\n\n` +
+              `📱 *Telefone:* ${formData.phone}\n` +
+              `📧 *Email:* ${formData.email}\n\n` +
               `📦 *Itens do Pedido:*\n${itensTexto}\n\n` +
               `💰 *Total: R$ ${cartTotal.toFixed(2).replace('.', ',')}*\n\n` +
               `✅ *Pagamento:* PIX realizado\n\n` +
               `Aguardo confirmação! ⚽`;
 
             const urlWhatsApp = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(mensagem)}`;
-            window.open(urlWhatsApp, '_blank');
 
-            setCart([]);
-            setFormData({ name: '', phone: '', cep: '', street: '', number: '', complement: '', neighborhood: '', city: '' });
-            setView('categories');
-            setShowCover(true);
+            setTimeout(() => {
+              window.open(urlWhatsApp, '_blank');
+              setShowWhatsAppModal(false);
+              setCart([]);
+              setFormData({ name: '', phone: '', email: '' });
+              setPaymentMethod('');
+              setView('categories');
+              setShowCover(true);
+            }, 2000);
           }}
-          style={{
-            width: '100%',
-            maxWidth: '600px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '12px',
-            margin: '0 auto',
-            padding: '16px',
-            backgroundColor: '#25D366',
-            color: '#fff',
-            fontFamily: "'Teko', sans-serif",
-            fontWeight: '600',
-            fontSize: '1.3rem',
-            textTransform: 'uppercase',
-            borderRadius: '16px',
-            border: 'none',
-            cursor: 'pointer',
-            boxShadow: '0 4px 15px rgba(37, 211, 102, 0.3)'
-          }}
+          style={{ width: '100%', maxWidth: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', margin: '0 auto', padding: '16px', backgroundColor: '#25D366', color: '#fff', fontFamily: "'Teko', sans-serif", fontWeight: '600', fontSize: '1.3rem', textTransform: 'uppercase', borderRadius: '16px', border: 'none', cursor: 'pointer', boxShadow: '0 4px 15px rgba(37, 211, 102, 0.3)' }}
         >
           <Send style={{ width: '20px', height: '20px' }} />
           Enviar Pedido via WhatsApp
         </button>
       </div>
+
+      {/* Modal de redirecionamento WhatsApp */}
+      {showWhatsAppModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.9)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1001
+        }}>
+          <div style={{
+            backgroundColor: '#1E1E1E',
+            padding: '40px',
+            borderRadius: '16px',
+            textAlign: 'center',
+            border: '1px solid #333',
+            maxWidth: '320px'
+          }}>
+            <div style={{
+              width: '60px',
+              height: '60px',
+              backgroundColor: 'rgba(37, 211, 102, 0.2)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 20px'
+            }}>
+              <Send style={{ width: '30px', height: '30px', color: '#25D366' }} />
+            </div>
+            <h3 style={{ color: '#fff', fontFamily: "'Teko', sans-serif", fontSize: '1.5rem', marginBottom: '10px' }}>
+              Enviando pedido...
+            </h3>
+            <p style={{ color: '#888', fontFamily: "'Teko', sans-serif", fontSize: '1.1rem' }}>
+              Você será redirecionado para o WhatsApp
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -1711,7 +1736,6 @@ export default function App() {
       {view === 'cart' && renderCart()}
       {view === 'checkout' && renderCheckout()}
       {view === 'payment' && renderPayment()}
-      {view === 'pix' && renderPix()}
       {view === 'pix' && renderPix()}
       {view === 'resumo' && renderResumo()}
       {selectedProduct && <SizeModal product={selectedProduct} onClose={() => setSelectedProduct(null)} onAddToCart={handleAddToCart} />}
