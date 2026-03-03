@@ -189,6 +189,7 @@ const fetchProductsByCategory = async (categoryId) => {
 const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesButton = false, showSearchBar = false, searchTerm = '', onSearchChange, onSearchSubmit, onClearSearch, showBackButton = false, onBackClick }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -231,24 +232,6 @@ const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesB
       minHeight: '45px',
       transition: 'top 0.3s ease-in-out',
     }}>
-      {/* Botão Voltar */}
-      {showBackButton && (
-        <button
-          onClick={onBackClick}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#fcb404',
-            cursor: 'pointer',
-            padding: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            marginRight: '10px'
-          }}
-        >
-          <ArrowLeftCircle style={{ width: '24px', height: '24px' }} />
-        </button>
-      )}
       {/* Borda com degradê */}
       <div style={{
         position: 'absolute',
@@ -260,86 +243,124 @@ const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesB
         pointerEvents: 'none'
       }} />
 
-      {/* Lado Esquerdo e Centro - Barra de Busca */}
-      <div className="header-search-container" style={{
-        display: 'flex',
-        alignItems: 'center',
-        flex: 1,
-        justifyContent: 'center',
-        paddingRight: '10px'
-      }}>
-        {showSearchBar && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            backgroundColor: '#fff',
-            borderRadius: '8px',
-            border: '2px solid #fcb404',
-            overflow: 'hidden',
-            width: '100%',
-            maxWidth: '300px'
-          }}>
-            <input
-              type="text"
-              placeholder="Buscar produto..."
-              value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
-              onKeyPress={handleKeyPress}
-              style={{
-                flex: 1,
-                padding: '8px 12px',
-                border: 'none',
-                outline: 'none',
-                fontSize: '14px',
-                backgroundColor: '#fff',
-                color: '#000'
-              }}
-            />
-            {searchTerm && (
-              <button
-                onClick={() => {
-                  if (onClearSearch) onClearSearch();
-                  document.activeElement.blur();
-                }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: '8px 4px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <span style={{ color: '#888', fontSize: '18px', fontWeight: 'bold' }}>×</span>
-              </button>
-            )}
+      {/* Lado Esquerdo - Botão Voltar */}
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {showBackButton && (
+          <button
+            onClick={onBackClick}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#fcb404',
+              cursor: 'pointer',
+              padding: '8px',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
+            <ArrowLeftCircle style={{ width: '24px', height: '24px' }} />
+          </button>
+        )}
+      </div>
+
+      {/* Centro - Barra de Pesquisa (quando aberta no mobile) */}
+      {showSearchBar && mobileSearchOpen && (
+        <div className="mobile-search-bar" style={{
+          display: 'flex',
+          alignItems: 'center',
+          backgroundColor: '#fff',
+          borderRadius: '8px',
+          border: '2px solid #fcb404',
+          overflow: 'hidden',
+          flex: 1,
+          marginLeft: '10px',
+          marginRight: '10px',
+          maxWidth: '400px'
+        }}>
+          <input
+            type="text"
+            placeholder="Buscar produto..."
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            onKeyPress={handleKeyPress}
+            autoFocus
+            style={{
+              flex: 1,
+              padding: '8px 12px',
+              border: 'none',
+              outline: 'none',
+              fontSize: '16px',
+              backgroundColor: '#fff',
+              color: '#000'
+            }}
+          />
+          {searchTerm && (
             <button
-              onClick={onSearchSubmit}
+              onClick={() => {
+                if (onClearSearch) onClearSearch();
+              }}
               style={{
                 background: 'none',
                 border: 'none',
-                padding: '8px 12px',
+                padding: '8px 4px',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}
             >
-              <Search style={{ width: '18px', height: '18px', color: '#fcb404' }} />
+              <span style={{ color: '#888', fontSize: '18px', fontWeight: 'bold' }}>×</span>
             </button>
-          </div>
-        )}
-      </div>
+          )}
+          <button
+            onClick={() => {
+              onSearchSubmit();
+              setMobileSearchOpen(false);
+              document.activeElement.blur();
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: '8px 12px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Search style={{ width: '18px', height: '18px', color: '#fcb404' }} />
+          </button>
+        </div>
+      )}
 
-      {/* Lado Direito - Ícones Grid e Carrinho */}
+      {/* Lado Direito - Ícones */}
       <div style={{
         display: 'flex',
-        gap: '15px',
+        gap: '5px',
         alignItems: 'center',
         justifyContent: 'flex-end'
       }}>
-        {showCategoriesButton && (
+        {/* Botão Lupa (quando barra fechada) */}
+        {showSearchBar && !mobileSearchOpen && (
+          <button
+            onClick={() => setMobileSearchOpen(true)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#fcb404',
+              cursor: 'pointer',
+              padding: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Search style={{ width: '18px', height: '18px' }} />
+          </button>
+        )}
+
+        {/* Botão Categorias */}
+        {showCategoriesButton && !mobileSearchOpen && (
           <button
             onClick={onCategoriesClick}
             style={{
@@ -353,6 +374,8 @@ const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesB
             <LayoutGrid style={{ width: '18px', height: '18px' }} />
           </button>
         )}
+
+        {/* Botão Carrinho */}
         <button
           onClick={onCartClick}
           style={{
@@ -1293,7 +1316,7 @@ export default function App() {
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-            <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#000' }}>PIX</span>
+            <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#000', fontFamily: "'Teko', sans-serif" }}>PIX</span>
           </div>
           <div>
             <h3 style={{ color: '#fff', fontFamily: "'Teko', sans-serif", fontSize: '1.5rem', textTransform: 'uppercase', margin: 0 }}>
