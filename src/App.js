@@ -275,7 +275,8 @@ const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesB
           flex: 1,
           marginLeft: '10px',
           marginRight: '10px',
-          maxWidth: '400px'
+          maxWidth: '400px',
+          minWidth: '0'
         }}>
           <input
             type="text"
@@ -286,6 +287,7 @@ const Header = ({ cartCount = 0, onCartClick, onCategoriesClick, showCategoriesB
             autoFocus
             style={{
               flex: 1,
+              minWidth: '0',
               padding: '8px 12px',
               border: 'none',
               outline: 'none',
