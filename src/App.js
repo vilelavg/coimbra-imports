@@ -774,7 +774,7 @@ export default function App() {
   };
 
   // Função para salvar pedido no banco de dados
-  const salvarPedido = async () => {
+  const salvarPedido = async (metodoPagamento = 'pendente') => {
     try {
       // 1. Inserir ou buscar cliente
       const { data: clienteExistente } = await supabase
@@ -818,7 +818,7 @@ export default function App() {
         .insert({
           id_cliente: idCliente,
           valor_total: cartTotal,
-          status: 'pendente'
+          status: metodoPagamento
         })
         .select('id_pedido')
         .single();
@@ -1273,7 +1273,7 @@ export default function App() {
             setPaymentMethod('A combinar');
 
             // Salvar pedido no banco de dados
-            const idPedido = await salvarPedido();
+            const idPedido = await salvarPedido('A cominar');
 
             // Montar mensagem do WhatsApp
             const itensTexto = cart.map(item =>
@@ -1566,7 +1566,7 @@ export default function App() {
             setShowWhatsAppModal(true);
 
             // Salvar pedido no banco de dados
-            const idPedido = await salvarPedido();
+            const idPedido = await salvarPedido('PIX');
 
             // Montar mensagem do WhatsApp
             const itensTexto = cart.map(item =>
