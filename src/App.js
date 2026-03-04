@@ -1040,7 +1040,7 @@ export default function App() {
               letterSpacing: '2px'
             }}
           >
-            Arsenal
+            Catálogo
           </button>
         </div>
       )}
